@@ -19,6 +19,7 @@
 
 import tkinter as tk, random
 from tkinter import simpledialog
+from tkinter import messagebox
 
 # This creates a window for the game using the Tkinter module
 root = tk.Tk()
@@ -96,8 +97,7 @@ def lose(message, exploded_cell=None):
 # Prompted GitHub Copilot for initial mine placement function (no changes required)
 # A function that randomly places mines and also ensuring the first click is safe
 def place_mines(exclude_x, exclude_y):
-    global a
-    
+    global a        
     # This creates a set of safe coordinates starting with the clicked cell
     safe = {(exclude_x, exclude_y)}
     
@@ -234,6 +234,39 @@ def update_remaining_flags_label():
 
     mines_remaining_label.config(text=f"Remaining mines: {remaining_flags}") # Sets the number of mines next to its label for the current game
 
+
+
+
+def easy_solver():
+    # find all cells that haven't been revealed yet
+    hidden_cells = [
+        (i, j) for i in range(N) for j in range(N)
+            if r[i][j] == False                
+    ]
+     
+    if hidden_cells:
+         # pick a random cell from hidden
+        x, y = random.choice(hidden_cells)
+        # trigger the reveal cell
+        reveal(x, y)
+
+# def medium_solver():
+
+# def hard_solver():
+
+
+# def automatic_play():
+    # call solver depending on which one the user selected and loop it until game is over or game is won
+    # print("hi")
+
+# def interactive_play():
+    # The goal is to keep track of who's turn it is and allow the player to select an interactive mode with the AI solvers 
+    # or an automatic solver that just plays the whole game completely on its own 
+
+        
+
+
+
 btns = [[tk.Button(root, width=2, height=1, font=("Arial", 12)) for _ in range(N)] for _ in range(N)]
 for i in range(N):
     for j in range(N):
@@ -247,6 +280,10 @@ for r_index in range(N):
 
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
+tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
+# tk.Button(root, text="Medium Mode", command = medium_solver).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
+# tk.Button(root, text="Hard Mode", command = hard_solver).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
+
 remaining_flags_label = tk.Label(root, text=f"Remaining flags: {calculate_remaining_flags()}") # Create label to show remaining flag count
 remaining_flags_label.grid(row=N + 3, column = 0, columnspan = N + 2) # Set label position
 
@@ -258,6 +295,7 @@ game_status.grid(row=N + 5, column=0, columnspan=N + 2) # sets the label positio
 
 timer_label = tk.Label(root, text=f"Time: {GAME_TIMER // 60:02}:{GAME_TIMER % 60:02}")
 timer_label.grid(row=N + 2, column=0, columnspan=N + 2)
+
 
 reset()
 root.mainloop()
