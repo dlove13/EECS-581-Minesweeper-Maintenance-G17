@@ -263,7 +263,8 @@ def easy_solver():
     # The goal is to keep track of who's turn it is and allow the player to select an interactive mode with the AI solvers 
     # or an automatic solver that just plays the whole game completely on its own 
 
-        
+def not_yet():
+    tk.messagebox.showinfo(title=None, message="Not Implemented")          
 
 
 
@@ -281,8 +282,8 @@ for r_index in range(N):
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
 tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
-# tk.Button(root, text="Medium Mode", command = medium_solver).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
-# tk.Button(root, text="Hard Mode", command = hard_solver).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Medium Mode", command = not_yet).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Hard Mode", command = not_yet).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
 
 remaining_flags_label = tk.Label(root, text=f"Remaining flags: {calculate_remaining_flags()}") # Create label to show remaining flag count
 remaining_flags_label.grid(row=N + 3, column = 0, columnspan = N + 2) # Set label position
@@ -291,7 +292,7 @@ mines_remaining_label = tk.Label(root, text=f"Mines: {M}") # created a label "Mi
 mines_remaining_label.grid(row=N + 4, column=0, columnspan=N + 2) # sets the label position
 
 game_status = tk.Label(root, text="Status: Playing") # created a label for the game status
-game_status.grid(row=N + 5, column=0, columnspan=N + 2) # sets the label position
+game_status.grid(row=N + 8, column=0, columnspan=N + 2) # sets the label position
 
 timer_label = tk.Label(root, text=f"Time: {GAME_TIMER // 60:02}:{GAME_TIMER % 60:02}")
 timer_label.grid(row=N + 2, column=0, columnspan=N + 2)
