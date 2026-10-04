@@ -1,5 +1,4 @@
-#
-#  SEMESTER:        EECS 581 Fall 2026
+#  CLASS:        EECS 581 Fall 2026
 #  PROJECT:         Project 1 - Minesweeper
 #  FILE:            minesweeper.py
 #
@@ -11,7 +10,9 @@
 #                   graphical user interface.
 #
 #  COLLABORATORS:   Liam Kinghouser, Gael Salazar-Morales, Joshua Fakunmoju, Carter Ruff, Gabriel Haro-Villa
-#  SOURCES:         GitHub Copilot 1.0.85 (Used in place_mines() as well as general guidance)
+#  MAINTAINERS/COLLABORATORS: Alex Lanter, Davina Love, Vrishank Kulkarni
+#
+#  SOURCES:         GitHub Copilot 1.0.85 (Used in place_mines() as well as general guidance), Claude (Autosolve loop)
 #
 #  AUTHOR:          Pruthviraj Sadhankar
 #  CREATION DATE:   09/13/2026
@@ -36,6 +37,7 @@ f = [[False] * N for _ in range(N)] #Tracks flags
 
 done = False                #Indicate if the game is finished
 first_move = True         
+auto_next = None            #Store return value of root.after() for autosolve loop
 
 #Set time reminaing to GAME_TIMER constant
 time_remaining = GAME_TIMER
@@ -181,6 +183,7 @@ def flag(x, y, e):
 def reset():
     global done, first_move, M, time_remaining
     stop_timer()
+    stop_auto()
     while True:
         mine_count = simpledialog.askinteger("Minesweeper", "Number of mines (10-20):", initialvalue=M, minvalue=10, maxvalue=20, parent=root)
 
@@ -241,7 +244,8 @@ def easy_solver():
     # find all cells that haven't been revealed yet
     hidden_cells = [
         (i, j) for i in range(N) for j in range(N)
-            if r[i][j] == False                
+            if r[i][j] == False
+            if f[i][j] == False  #Technically a hidden cell but so it doesn't click a flagged cell              
     ]
      
     if hidden_cells:
@@ -249,15 +253,70 @@ def easy_solver():
         x, y = random.choice(hidden_cells)
         # trigger the reveal cell
         reveal(x, y)
+        if not done:
+            check_win()
 
 # def medium_solver():
+#After implement, link into the autoplay and one-click
 
 # def hard_solver():
+#After implement, link into the autoplay and one-click
 
 
-# def automatic_play():
-    # call solver depending on which one the user selected and loop it until game is over or game is won
-    # print("hi")
+#Autosolve loop made by Claude (Sonnet 5.5), commented by Alex.
+def stop_auto(): #If stop_auto is called checks if there is a queued move, cancel and clear it.
+    global auto_next
+    if auto_next is not None:
+        root.after_cancel(auto_next)
+        auto_next = None
+
+def auto_step(solver): #One autosolve step. Do the move, check for win, schedule next move.
+    global auto_next
+    auto_next = None
+    if done:
+        return
+
+    solver()#Do move as called
+
+    if done or first_move: #If game was reset or done solving stop
+        return
+
+    check_win() #Currently redundant for easy since I added check_win to it
+    if done:
+        return
+
+    # Stop if only flagged cells are left to reveal
+    if not any(not r[i][j] and not f[i][j] for i in range(N) for j in range(N)):
+        return
+
+    auto_next = root.after(200, lambda: auto_step(solver)) #Queue next move in 200ms, store call's id to cancel if needed
+
+def start_auto(solver): #Starts autosolve first clearing queue, call auto_step to start queueing loop
+    stop_auto()
+    auto_step(solver)
+
+def automatic_play(): #Function for popup and selecting autosolve
+    if done:
+        return
+
+    popup = tk.Toplevel(root)
+    popup.title("Autosolve")
+    popup.transient(root) #Attaches popup to root window so it stays on top
+    popup.resizable(False, False)
+
+    tk.Label(popup, text="Autosolve for the rest of the game", padx=20, pady=10).pack() #Create popup
+
+    def choose(action): #When choose action close window and do action
+        popup.destroy()
+        action()
+
+    # Create buttons for each difficulty and a cancel button
+    tk.Button(popup, text="Easy", width=12, command=lambda: choose(lambda: start_auto(easy_solver))).pack(padx=20, pady=2)
+    tk.Button(popup, text="Medium", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
+    tk.Button(popup, text="Hard", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
+    tk.Button(popup, text="Cancel", width=12, command=popup.destroy).pack(padx=20, pady=(2, 10))
+
+    popup.grab_set() #Makes board unable to be clicked while autosolve popup is open
 
 # def interactive_play():
     # The goal is to keep track of who's turn it is and allow the player to select an interactive mode with the AI solvers 
@@ -284,6 +343,7 @@ tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspa
 tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Medium Mode", command = not_yet).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Hard Mode", command = not_yet).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Autosolve", command = automatic_play).grid(row=N + 8, column=0, columnspan=N + 1, sticky="ew")
 
 remaining_flags_label = tk.Label(root, text=f"Remaining flags: {calculate_remaining_flags()}") # Create label to show remaining flag count
 remaining_flags_label.grid(row=N + 3, column = 0, columnspan = N + 2) # Set label position
@@ -292,7 +352,7 @@ mines_remaining_label = tk.Label(root, text=f"Mines: {M}") # created a label "Mi
 mines_remaining_label.grid(row=N + 4, column=0, columnspan=N + 2) # sets the label position
 
 game_status = tk.Label(root, text="Status: Playing") # created a label for the game status
-game_status.grid(row=N + 8, column=0, columnspan=N + 2) # sets the label position
+game_status.grid(row=N + 9, column=0, columnspan=N + 2) # sets the label position
 
 timer_label = tk.Label(root, text=f"Time: {GAME_TIMER // 60:02}:{GAME_TIMER % 60:02}")
 timer_label.grid(row=N + 2, column=0, columnspan=N + 2)
