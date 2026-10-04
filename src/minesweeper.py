@@ -19,6 +19,7 @@
 
 import tkinter as tk, random
 from tkinter import simpledialog
+from tkinter import messagebox
 
 # This creates a window for the game using the Tkinter module
 root = tk.Tk()
@@ -185,24 +186,35 @@ def update_remaining_flags_label():
     mines_remaining_label.config(text=f"Remaining mines: {remaining_flags}") # Sets the number of mines next to its label for the current game
 
 
+
+
 def easy_solver():
-    """Finds all covered cells and uncovers one completely at random."""
-    # Find all cells that have not been revealed yet
+    # find all cells that haven't been revealed yet
     hidden_cells = [
         (i, j) for i in range(N) for j in range(N)
-            if r[i][j] == False
-                    
+            if r[i][j] == False                
     ]
      
     if hidden_cells:
-         # Pick a random cell from the list
+         # pick a random cell from hidden
         x, y = random.choice(hidden_cells)
-        # Programmatically trigger the click/reveal action
+        # trigger the reveal cell
         reveal(x, y)
 
+# def medium_solver():
 
-    
+# def hard_solver():
 
+
+# def automatic_play():
+    # call solver depending on which one the user selected and loop it until game is over or game is won
+    # print("hi")
+
+# def interactive_play():
+    # The goal is to keep track of who's turn it is and allow the player to select an interactive mode with the AI solvers 
+    # or an automatic solver that just plays the whole game completely on its own 
+
+        
 
 
 
