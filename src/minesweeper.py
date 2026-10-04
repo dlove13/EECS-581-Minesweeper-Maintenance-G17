@@ -27,11 +27,71 @@ root.title("Minesweeper")    # This helps title the window 'Minesweeper'
 N = 10                        # Defines the dimension of the grid
 M = 15                        # Defines a default amount of hidden mines
 
-a = [[0] * N for _ in range(N)]
-r = [[False] * N for _ in range(N)]
-f = [[False] * N for _ in range(N)]
-done = False
-first_move = True
+GAME_TIMER = 2 * 60           #Player has 2 minutes to finish the game
+
+a = [[0] * N for _ in range(N)]     #Draws grid
+r = [[False] * N for _ in range(N)] #Tracks revealed cells
+f = [[False] * N for _ in range(N)] #Tracks flags
+
+done = False                #Indicate if the game is finished
+first_move = True         
+
+#Set time reminaing to GAME_TIMER constant
+time_remaining = GAME_TIMER
+timer = None            #Store return value of root.after()
+
+#Stop the timer if it is running
+def stop_timer():
+    global timer
+    if timer is not None:
+        root.after_cancel(timer)
+        timer = None
+
+#Increment timer or trigger lose scenario
+def update_timer():
+    global time_remaining, timer
+    timer = None
+    if done:
+        return
+
+    time_remaining -= 1
+    timer_label.config(text=f"Time: {time_remaining // 60:02}:{time_remaining % 60:02}")
+
+    #Lose condition if the timer runs out before the player wins/loses the game
+    if time_remaining <= 0:
+        lose("Time's up! You lost.")
+    else:
+        #Otherwise update the timer +1 second
+        timer = root.after(1000, update_timer)
+
+
+def start_timer():
+    global timer
+    timer = root.after(1000, update_timer)
+
+#Lose condition if mine was clicked
+def lose(message, exploded_cell=None):
+    #Keeps the game from calling another lose condition
+    global done
+    if done:
+        return
+
+    #After clicking a mine, finish the game
+    done = True
+    stop_timer()
+
+    #Changes graphic to exploded mine
+    for x in range(N):
+        for y in range(N):
+            if a[x][y] == -1:
+                color = "red" if (x, y) == exploded_cell else "lightGray"
+                btns[x][y].config(text="💥", bg=color, fg="black")
+
+    game_status.config(text="Status: Game Over: Loss")
+    if tk.messagebox.askyesno("Minesweeper", f"{message} Play again?"):
+        reset()
+    else:
+        root.destroy()
 
 # Prompted GitHub Copilot for initial mine placement function (no changes required)
 # A function that randomly places mines and also ensuring the first click is safe
@@ -62,32 +122,17 @@ def place_mines(exclude_x, exclude_y):
 
 
 def reveal(x, y):
-    global done, first_move
+    global first_move
     if not (0 <= x < N and 0 <= y < N and not r[x][y] and not f[x][y]):
         return
     if first_move:
         place_mines(x, y)
         first_move = False
+        start_timer()               #Start the timer after the first move
     r[x][y] = True
+    #If the tile revealed had a mine
     if a[x][y] == -1:
-        for p in range(N):
-            for q in range(N):
-                if a[p][q] == -1:
-                    # If its the mine the user lost on
-                    if p == x and q == y:
-                        # Make the bg red and the mines black
-                        btns[p][q].config(text="💥", bg="red", fg="black")
-                    # Every other mine
-                    else:
-                        # Keep bg the same but make mines black
-                        btns[p][q].config(text="💥", bg="lightGray", fg="black")
-                    
-        done = True
-        game_status.config(text="Status: Game Over: Loss") # Sets the game status to 'Loss' when the player uncovers a mine
-        if tk.messagebox.askyesno("Minesweeper", "Boom! You lost. Play again?"):
-            reset()
-        else:
-            root.destroy()
+        lose("Boom! You lost.", (x, y))
         return
     btns[x][y].config(relief=tk.SUNKEN, text=str(a[x][y] or ""), bg="lightgray", fg=["blue", "green", "red", "navy", "brown", "teal", "black", "gray", "darkgray"][a[x][y]])
     if a[x][y] == 0:
@@ -103,6 +148,7 @@ def check_win():
     winCon = sum(sum(r, [])) == N * N - M
     if not done and winCon:
         done = True
+        stop_timer()
         game_status.config(text="Status: Victory") # Sets the game status to 'Victory' when the player wins
         tk.messagebox.showinfo("Minesweeper", "You win!")
         root.destroy()  # closes the game window
@@ -133,7 +179,8 @@ def flag(x, y, e):
 
 
 def reset():
-    global done, first_move, M
+    global done, first_move, M, time_remaining
+    stop_timer()
     while True:
         mine_count = simpledialog.askinteger("Minesweeper", "Number of mines (10-20):", initialvalue=M, minvalue=10, maxvalue=20, parent=root)
 
@@ -153,6 +200,8 @@ def reset():
             btns[i][j].config(text="", bg="LightGray", fg="black", relief=tk.RAISED)
     done = False
     first_move = True
+    time_remaining = GAME_TIMER
+    timer_label.config(text=f"Time: {time_remaining // 60:02}:{time_remaining % 60:02}")
     game_status.config(text="Status: Playing") # Sets the current status to 'Playing' when user is playing
 
     update_remaining_flags_label()
@@ -199,13 +248,16 @@ for r_index in range(N):
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
 remaining_flags_label = tk.Label(root, text=f"Remaining flags: {calculate_remaining_flags()}") # Create label to show remaining flag count
-remaining_flags_label.grid(row=N + 2, column = 0, columnspan = N + 2) # Set label position
+remaining_flags_label.grid(row=N + 3, column = 0, columnspan = N + 2) # Set label position
 
 mines_remaining_label = tk.Label(root, text=f"Mines: {M}") # created a label "Mines:" on the UI to show the mine count
-mines_remaining_label.grid(row=N + 3, column=0, columnspan=N + 2) # sets the label position
+mines_remaining_label.grid(row=N + 4, column=0, columnspan=N + 2) # sets the label position
 
 game_status = tk.Label(root, text="Status: Playing") # created a label for the game status
-game_status.grid(row=N + 4, column=0, columnspan=N + 2) # sets the label position
+game_status.grid(row=N + 5, column=0, columnspan=N + 2) # sets the label position
+
+timer_label = tk.Label(root, text=f"Time: {GAME_TIMER // 60:02}:{GAME_TIMER % 60:02}")
+timer_label.grid(row=N + 2, column=0, columnspan=N + 2)
 
 reset()
 root.mainloop()
