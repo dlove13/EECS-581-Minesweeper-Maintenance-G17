@@ -75,6 +75,7 @@ Follow these steps to run Minesweeper locally.
 ## Usage
 
 When the game begins, the player selects the number of mines to place on the board. The number of mines must be between **10 and 20**.
+The player is also prompted to enable or disable the timer and enter a positive time limit of up to one hour in minutes and seconds. Seconds must be between 0 and 59. When enabled, the timer starts on the first move and running out of time ends the game.
 
 The game is played on a **10x10 grid**, with columns labeled **A–J** and rows numbered **1–10**.
 

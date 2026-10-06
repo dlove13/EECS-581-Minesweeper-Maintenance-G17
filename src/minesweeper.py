@@ -29,7 +29,8 @@ root.title("Minesweeper")    # This helps title the window 'Minesweeper'
 N = 10                        # Defines the dimension of the grid
 M = 15                        # Defines a default amount of hidden mines
 
-GAME_TIMER = 2 * 60           #Player has 2 minutes to finish the game
+time_limit_seconds = 60  # Default time limit in seconds (1 minute)
+MAX_TIME_LIMIT_SECONDS = 60 * 60  #Set max time limit to be an hour (3600 seconds)
 
 a = [[0] * N for _ in range(N)]     #Draws grid
 r = [[False] * N for _ in range(N)] #Tracks revealed cells
@@ -39,9 +40,84 @@ done = False                #Indicate if the game is finished
 first_move = True         
 auto_next = None            #Store return value of root.after() for autosolve loop
 
-#Set time reminaing to GAME_TIMER constant
-time_remaining = GAME_TIMER
+#Set time reminaing to the time limit
+time_remaining = time_limit_seconds
 timer = None            #Store return value of root.after()
+use_timer = True
+
+#Consolidate game setup dialog into a class 
+#Suggested by Copilot Luna in VSCode
+class GameSetupDialog(simpledialog.Dialog):
+    def __init__(self, parent, mine_count, timer_enabled, timer_seconds):
+        self.mine_count = mine_count
+        self.timer_enabled = timer_enabled
+        self.timer_seconds = timer_seconds
+        super().__init__(parent, "Minesweeper Setup")
+
+    def body(self, master):
+        tk.Label(master, text="Number of mines (10-20):").grid(row=0, column=0, sticky="w")
+        self.mine_count_entry = tk.Spinbox(master, from_=10, to=20, width=5)
+        self.mine_count_entry.delete(0, tk.END)
+        self.mine_count_entry.insert(0, str(self.mine_count))
+        self.mine_count_entry.grid(row=0, column=1, padx=(8, 0))
+
+        self.timer_var = tk.BooleanVar(value=self.timer_enabled)
+        tk.Checkbutton(
+            master,
+            text="Use the timer (1 hour max)",
+            variable=self.timer_var,
+        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        tk.Label(master, text="Time limit:").grid(row=2, column=0, sticky="w")
+        time_frame = tk.Frame(master)
+        time_frame.grid(row=2, column=1, padx=(8, 0))
+        self.minutes_entry = tk.Entry(time_frame, width=4)
+        self.minutes_entry.insert(0, str(self.timer_seconds // 60))
+        self.minutes_entry.pack(side=tk.LEFT)
+        tk.Label(time_frame, text="min").pack(side=tk.LEFT, padx=(2, 6))
+        self.seconds_entry = tk.Entry(time_frame, width=4)
+        self.seconds_entry.insert(0, str(self.timer_seconds % 60))
+        self.seconds_entry.pack(side=tk.LEFT)
+        tk.Label(time_frame, text="sec").pack(side=tk.LEFT, padx=(2, 0))
+        return self.mine_count_entry
+
+    def validate(self):
+        try:
+            mine_count = int(self.mine_count_entry.get())
+        except ValueError:
+            mine_count = 0
+        if not 10 <= mine_count <= 20:
+            messagebox.showerror(
+                "Invalid mine count",
+                "Please enter a number of mines between 10 and 20.",
+                parent=self,
+            )
+            return False
+        try:
+            minutes = int(self.minutes_entry.get())
+            seconds = int(self.seconds_entry.get())
+        except ValueError:
+            minutes = seconds = -1
+        total_seconds = minutes * 60 + seconds
+        if (
+            minutes < 0
+            or not 0 <= seconds < 60
+            or not 0 < total_seconds <= MAX_TIME_LIMIT_SECONDS
+        ):
+            messagebox.showerror(
+                "Invalid time limit",
+                "Enter a positive time of no more than 1 hour, using 0-59 seconds.",
+                parent=self,
+            )
+            return False
+        return True
+
+    def apply(self):
+        self.result = (
+            int(self.mine_count_entry.get()),
+            self.timer_var.get(),
+            int(self.minutes_entry.get()) * 60 + int(self.seconds_entry.get()),
+        )
+
 
 #Stop the timer if it is running
 def stop_timer():
@@ -54,7 +130,7 @@ def stop_timer():
 def update_timer():
     global time_remaining, timer
     timer = None
-    if done:
+    if done or not use_timer:
         return
 
     time_remaining -= 1
@@ -91,7 +167,7 @@ def lose(message, exploded_cell=None):
                 btns[x][y].config(text="💥", bg=color, fg="black")
 
     game_status.config(text="Status: Game Over: Loss")
-    if tk.messagebox.askyesno("Minesweeper", f"{message} Play again?"):
+    if messagebox.askyesno("Minesweeper", f"{message} Play again?", parent=root):
         reset()
     else:
         root.destroy()
@@ -152,7 +228,7 @@ def check_win():
         done = True
         stop_timer()
         game_status.config(text="Status: Victory") # Sets the game status to 'Victory' when the player wins
-        tk.messagebox.showinfo("Minesweeper", "You win!")
+        messagebox.showinfo("Minesweeper", "You win!", parent=root)
         root.destroy()  # closes the game window
 
 def click(x, y):
@@ -181,20 +257,18 @@ def flag(x, y, e):
 
 
 def reset():
-    global done, first_move, M, time_remaining
+    global done, first_move, M, time_remaining, time_limit_seconds, use_timer
     stop_timer()
     stop_auto()
-    while True:
-        mine_count = simpledialog.askinteger("Minesweeper", "Number of mines (10-20):", initialvalue=M, minvalue=10, maxvalue=20, parent=root)
+    settings = GameSetupDialog(root, M, use_timer, time_limit_seconds).result
+    if settings is None:
+        settings = (M, use_timer, time_limit_seconds)
+    mine_count, use_timer, time_limit_seconds = settings
 
-        # Bring window back to front
-        root.lift()
-        root.focus_force()
+    # Bring window back to front
+    root.lift()
+    root.focus_force()
 
-        if mine_count is None:
-            mine_count = M
-        if 10 <= mine_count <= 20:
-            break
     M = mine_count
     for i in range(N):
         for j in range(N):
@@ -203,8 +277,9 @@ def reset():
             btns[i][j].config(text="", bg="LightGray", fg="black", relief=tk.RAISED)
     done = False
     first_move = True
-    time_remaining = GAME_TIMER
-    timer_label.config(text=f"Time: {time_remaining // 60:02}:{time_remaining % 60:02}")
+    time_remaining = time_limit_seconds
+    timer_text = f"Time: {time_remaining // 60:02}:{time_remaining % 60:02}" if use_timer else "Time: Off"
+    timer_label.config(text=timer_text)
     game_status.config(text="Status: Playing") # Sets the current status to 'Playing' when user is playing
 
     update_remaining_flags_label()
@@ -323,7 +398,7 @@ def automatic_play(): #Function for popup and selecting autosolve
     # or an automatic solver that just plays the whole game completely on its own 
 
 def not_yet():
-    tk.messagebox.showinfo(title=None, message="Not Implemented")          
+    messagebox.showinfo(title=None, message="Not Implemented")
 
 
 
@@ -354,7 +429,7 @@ mines_remaining_label.grid(row=N + 4, column=0, columnspan=N + 2) # sets the lab
 game_status = tk.Label(root, text="Status: Playing") # created a label for the game status
 game_status.grid(row=N + 9, column=0, columnspan=N + 2) # sets the label position
 
-timer_label = tk.Label(root, text=f"Time: {GAME_TIMER // 60:02}:{GAME_TIMER % 60:02}")
+timer_label = tk.Label(root, text=f"Time: {time_limit_seconds // 60:02}:{time_limit_seconds % 60:02}")
 timer_label.grid(row=N + 2, column=0, columnspan=N + 2)
 
 
