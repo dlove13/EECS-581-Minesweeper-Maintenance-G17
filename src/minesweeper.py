@@ -255,7 +255,7 @@ def easy_solver():
         reveal(x, y)
         if not done:
             check_win()
-#Authored by Mo Osby
+#Authored by Mo Osby and Noah Mast
 def medium_solver():
     if done:
         return
@@ -285,6 +285,17 @@ def medium_solver():
                     if calculate_remaining_flags() > 0:
                         flag(i, j, None)
                         made_progress = True
+
+            # Reveals neighbors if number of neighbors = the cell's mine count
+            if len(flagged_neighbors) == a[x][y]:
+                # Reveals all unflagged neighbors
+                for (i,j) in unflagged_neighbors:
+                    if done:
+                        return
+
+                    click(i, j)
+
+                    made_progress = True
 
     if not done:
         check_win()
