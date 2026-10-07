@@ -255,9 +255,43 @@ def easy_solver():
         reveal(x, y)
         if not done:
             check_win()
+#Authored by Mo Osby
+def medium_solver():
+    if done:
+        return
+    # Track progress for medium if none then use easy solver to randomly reveal cells
+    made_progress = False
 
-# def medium_solver():
-#After implement, link into the autoplay and one-click
+    for x in range(N):
+        for y in range(N):
+            if not r[x][y] or a[x][y] <=0: #if not revealed or no adjacent mines
+                continue
+            # Find all hidden neighbors of the current cell
+            # (i,j) is the cell and (x,y) is the current cell
+            neighbors = [(i,j)
+                                for i in range(max(0,x-1), min(N, x+2))
+                                for j in range(max(0,y-1), min(N, y+2))
+                                if (i,j)!=(x,y) # (i,j) is the cell and (x,y) is the current cell
+                                ]
+            # Count hidden neighbors
+            flagged_neighbors = [(i,j) for i,j in neighbors if f[i][j]]
+            unflagged_neighbors = [(i,j) for i,j in neighbors if not f[i][j] and not r[i][j]]
+
+            hidden_neighbors = (len(flagged_neighbors) + len(unflagged_neighbors))
+
+            #if hidden neighbor count equals the number of adjacent mines, flag them
+            if hidden_neighbors == a[x][y]:
+                for i,j in unflagged_neighbors:
+                    if calculate_remaining_flags() > 0:
+                        flag(i, j, None)
+                        made_progress = True
+
+    if not done:
+        check_win()
+
+    if not done and not made_progress:
+        easy_solver()
+            
 
 # def hard_solver():
 #After implement, link into the autoplay and one-click
