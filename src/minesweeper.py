@@ -255,9 +255,54 @@ def easy_solver():
         reveal(x, y)
         if not done:
             check_win()
+#Authored by Mo Osby and Noah Mast
+def medium_solver():
+    if done:
+        return
+    # Track progress for medium if none then use easy solver to randomly reveal cells
+    made_progress = False
 
-# def medium_solver():
-#After implement, link into the autoplay and one-click
+    for x in range(N):
+        for y in range(N):
+            if not r[x][y] or a[x][y] <=0: #if not revealed or no adjacent mines
+                continue
+            # Find all hidden neighbors of the current cell
+            # (i,j) is the cell and (x,y) is the current cell
+            neighbors = [(i,j)
+                                for i in range(max(0,x-1), min(N, x+2))
+                                for j in range(max(0,y-1), min(N, y+2))
+                                if (i,j)!=(x,y) # (i,j) is the cell and (x,y) is the current cell
+                                ]
+            # Count hidden neighbors
+            flagged_neighbors = [(i,j) for i,j in neighbors if f[i][j]]
+            unflagged_neighbors = [(i,j) for i,j in neighbors if not f[i][j] and not r[i][j]]
+
+            hidden_neighbors = (len(flagged_neighbors) + len(unflagged_neighbors))
+
+            #if hidden neighbor count equals the number of adjacent mines, flag them
+            if hidden_neighbors == a[x][y]:
+                for i,j in unflagged_neighbors:
+                    if calculate_remaining_flags() > 0:
+                        flag(i, j, None)
+                        made_progress = True
+
+            # Reveals neighbors if number of neighbors = the cell's mine count
+            if len(flagged_neighbors) == a[x][y]:
+                # Reveals all unflagged neighbors
+                for (i,j) in unflagged_neighbors:
+                    if done:
+                        return
+
+                    click(i, j)
+
+                    made_progress = True
+
+    if not done:
+        check_win()
+
+    if not done and not made_progress:
+        easy_solver()
+            
 
 # def hard_solver():
 #After implement, link into the autoplay and one-click
@@ -312,7 +357,7 @@ def automatic_play(): #Function for popup and selecting autosolve
 
     # Create buttons for each difficulty and a cancel button
     tk.Button(popup, text="Easy", width=12, command=lambda: choose(lambda: start_auto(easy_solver))).pack(padx=20, pady=2)
-    tk.Button(popup, text="Medium", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
+    tk.Button(popup, text="Medium", width=12, command=lambda: choose(lambda: start_auto(medium_solver))).pack(padx=20, pady=2)
     tk.Button(popup, text="Hard", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
     tk.Button(popup, text="Cancel", width=12, command=popup.destroy).pack(padx=20, pady=(2, 10))
 
@@ -341,7 +386,7 @@ for r_index in range(N):
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
 tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
-tk.Button(root, text="Medium Mode", command = not_yet).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Medium Mode", command = medium_solver).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Hard Mode", command = not_yet).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Autosolve", command = automatic_play).grid(row=N + 8, column=0, columnspan=N + 1, sticky="ew")
 
