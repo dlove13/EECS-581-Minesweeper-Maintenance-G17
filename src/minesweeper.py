@@ -346,7 +346,7 @@ def automatic_play(): #Function for popup and selecting autosolve
 
     # Create buttons for each difficulty and a cancel button
     tk.Button(popup, text="Easy", width=12, command=lambda: choose(lambda: start_auto(easy_solver))).pack(padx=20, pady=2)
-    tk.Button(popup, text="Medium", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
+    tk.Button(popup, text="Medium", width=12, command=lambda: choose(lambda: start_auto(medium_solver))).pack(padx=20, pady=2)
     tk.Button(popup, text="Hard", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
     tk.Button(popup, text="Cancel", width=12, command=popup.destroy).pack(padx=20, pady=(2, 10))
 
@@ -375,7 +375,7 @@ for r_index in range(N):
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
 tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
-tk.Button(root, text="Medium Mode", command = not_yet).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Medium Mode", command = medium_solver).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Hard Mode", command = not_yet).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Autosolve", command = automatic_play).grid(row=N + 8, column=0, columnspan=N + 1, sticky="ew")
 
