@@ -10,7 +10,7 @@
 #                   graphical user interface.
 #
 #  COLLABORATORS:   Liam Kinghouser, Gael Salazar-Morales, Joshua Fakunmoju, Carter Ruff, Gabriel Haro-Villa
-#  MAINTAINERS/COLLABORATORS: Alex Lanter, Davina Love, Vrishank Kulkarni
+#  MAINTAINERS/COLLABORATORS: Alex Lanter, Davina Love, Vrishank Kulkarni, Drew Franke
 #
 #  SOURCES:         GitHub Copilot 1.0.85 (Used in place_mines() as well as general guidance), Claude (Autosolve loop)
 #
@@ -256,11 +256,116 @@ def easy_solver():
         if not done:
             check_win()
 
-# def medium_solver():
-#After implement, link into the autoplay and one-click
+def medium_solver():
+    if not medium_rules():
+        #print("Medium -> Fallback to easy solver")
+        easy_solver()
 
-# def hard_solver():
-#After implement, link into the autoplay and one-click
+def medium_rules():
+# I generated this with Claude (sonnet 5.5) for testing purposes with the hard solver - Drew
+    can_flag = calculate_remaining_flags() > 0
+    for x in range(N):
+        for y in range(N):
+            if not r[x][y] or a[x][y] <= 0:
+                continue
+            hidden = hidden_set(x, y)
+            flagged = [c for c in hidden if f[c[0]][c[1]]]
+            unflagged = [c for c in hidden if not f[c[0]][c[1]]]
+            if not unflagged:
+                continue  # nothing left to do around this cell
+ 
+            if len(hidden) == a[x][y] and can_flag:   # Rule 1
+                place_flag(*unflagged[0])
+                #print(f"Flagged {unflagged[0]} using Rule 1")
+                return True
+            if len(flagged) == a[x][y]:               # Rule 2
+                reveal(*unflagged[0])
+                after_ai_reveal()
+                #print(f"Revealed {unflagged[0]} using Rule 2")
+                return True
+    return False
+
+
+
+# ----- various helpers for hard mode solver -----
+#all assoicated functions written by hand with the help of VScode inline suggestions
+
+#neighbors of current cell in bounds
+def neighbors(x, y):
+    return [(i, j)
+            for i in range(max(0, x - 1), min(N, x + 2))
+            for j in range(max(0, y - 1), min(N, y + 2))
+            if (i,j) != (x,y)]
+
+#set of neighbors that are hidden
+def hidden_set(x, y):
+    return {(i, j) for (i, j) in neighbors(x, y) if not r[i][j]}
+
+
+def in_bounds(c):
+    return 0 <= c[0] < N and 0 <= c[1] < N
+
+#ai flag placement
+def place_flag(x, y):
+    f[x][y] = True
+    btns[x][y].config(text="⚑", fg="red")
+    update_remaining_flags_label()
+
+#check for ai win
+def after_ai_reveal():
+    if not done:
+        check_win()
+
+
+def one_two_one_solver():
+    '''
+    Looks for 3 revealed cells in a row showing a 1-2-1 pattern whose hidden
+    neighbor cells sit on one side of the pattern.
+    p, q, and t are the hidden cells that are neighbors of the 1-2-1 pattern.
+    A touches {p, q}, B touches {p, q, t}, and C touches {q, t}.
+    A : p+q=1, B : p+q+t=2, C : q+t=1 => q is a safe cell, p and t are mines.
+    '''
+    can_flag = calculate_remaining_flags() > 0
+    orientations = [((0,1), (1,0)), ((0, 1), (-1, 0)) , ((1, 0), (0, 1)), ((1, 0), (0, -1))]
+    for i in range(N):
+        for j in range(N):
+            if not (r[i][j] and a[i][j] == 2):
+                continue
+            for d, s in orientations:       #d = direction along line, s = direction perpendicular to line
+                A = (i - d[0], j - d[1])    #revealed cells in pattern A - B - C along direction d
+                B = (i, j)
+                C = (i + d[0], j + d[1])
+                p = (A[0] + s[0], A[1] + s[1])  #hidden cells p, q, t along direction s
+                q = (B[0] + s[0], B[1] + s[1])
+                t = (C[0] + s[0], C[1] + s[1])
+                if not all(in_bounds(c) for c in [A, C, p, q, t]):  #skip if any of the cells are out of bounds
+                    continue
+                if not (r[A[0]][A[1]] and a[A[0]][A[1]] == 1 and r[C[0]][C[1]] and a[C[0]][C[1]] == 1): #skip if A and C are not revealed 1's
+                    continue
+                if not (hidden_set(*A) == {p, q} and hidden_set(*B) == {p, q, t} and hidden_set(*C) == {q, t}):
+                    continue
+                for mine in (p, t):
+                    if not f[mine[0]][mine[1]] and can_flag:
+                        place_flag(*mine)
+                        #print(f"Flagged {mine} using 1-2-1 pattern")
+                        return True
+                if not f[q[0]][q[1]] and not r[q[0]][q[1]]:
+                    reveal(*q)
+                    after_ai_reveal()
+                    #print(f"Revealed {q} using 1-2-1 pattern")
+                    return True
+    return False
+
+def hard_solver():
+    if done:
+        return
+    if one_two_one_solver():
+        return
+    if medium_rules():
+        return
+    else:
+        #print("Hard -> Fallback to easy solver")
+        easy_solver() #Fallback to easy solver if no other rules apply
 
 
 #Autosolve loop made by Claude (Sonnet 5.5), commented by Alex.
@@ -312,8 +417,8 @@ def automatic_play(): #Function for popup and selecting autosolve
 
     # Create buttons for each difficulty and a cancel button
     tk.Button(popup, text="Easy", width=12, command=lambda: choose(lambda: start_auto(easy_solver))).pack(padx=20, pady=2)
-    tk.Button(popup, text="Medium", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
-    tk.Button(popup, text="Hard", width=12, command=lambda: choose(not_yet)).pack(padx=20, pady=2)
+    tk.Button(popup, text="Medium", width=12, command=lambda: choose(lambda: start_auto(medium_solver))).pack(padx=20, pady=2)
+    tk.Button(popup, text="Hard", width=12, command=lambda: choose(lambda: start_auto(hard_solver))).pack(padx=20, pady=2)
     tk.Button(popup, text="Cancel", width=12, command=popup.destroy).pack(padx=20, pady=(2, 10))
 
     popup.grab_set() #Makes board unable to be clicked while autosolve popup is open
@@ -341,8 +446,8 @@ for r_index in range(N):
 tk.Button(root, text="Reset", command=reset).grid(row=N + 1, column=0, columnspan=N + 1, sticky="ew")
 
 tk.Button(root, text="Easy Mode", command = easy_solver).grid(row=N + 5, column=0, columnspan=N + 1, sticky="ew")
-tk.Button(root, text="Medium Mode", command = not_yet).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
-tk.Button(root, text="Hard Mode", command = not_yet).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Medium Mode", command = medium_solver).grid(row=N + 6, column=0, columnspan=N + 1, sticky="ew")
+tk.Button(root, text="Hard Mode", command = hard_solver).grid(row=N + 7, column=0, columnspan=N + 1, sticky="ew")
 tk.Button(root, text="Autosolve", command = automatic_play).grid(row=N + 8, column=0, columnspan=N + 1, sticky="ew")
 
 remaining_flags_label = tk.Label(root, text=f"Remaining flags: {calculate_remaining_flags()}") # Create label to show remaining flag count
