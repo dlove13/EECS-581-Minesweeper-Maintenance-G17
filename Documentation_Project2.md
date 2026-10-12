@@ -502,15 +502,12 @@ We made informal estimates based on how difficult we expected each member's assi
 
 Actual hours were collected from team members' work reports in the Discord chat. Each report identified the work completed and the time spent. EECS 581 lecture time is excluded.
 
-#### Group Meetings: Approximately 2–3 hours of meeting duration
-
-The team reports approximately 2–3 hours of meetings. Exact dates, durations, and individual attendance have not been confirmed. This duration is not added to the person-hours total because meeting person-hours must account for each attendee's time.
-
-#### Group Meeting Estimate: Approximately 2–3 hours of meeting duration
+#### Group Meetings: Approximately 2.5 hours of meeting duration
+#### Group Meeting Estimate: 3 hours of meeting duration
 
 ## Grand Total Person Hours
 
-### Estimated Work Hours = 12
-### Actual Reported Work Hours = 16.25
+### Estimated Work Hours = 20
+### Actual Reported Work Hours = 24.25
 
-These totals exclude meeting person-hours, which must be added once individual attendance and durations are confirmed.
+These totals include meeting time
