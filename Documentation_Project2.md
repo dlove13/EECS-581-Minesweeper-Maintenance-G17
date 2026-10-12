@@ -462,9 +462,9 @@ Code attribution must remain in the relevant source files. File prologues must i
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 09/21/2026 — Reviewed inherited project, tested Project 1 requirements, and summarized findings and possible additions | Included in total | 0.75 |
-| 10/03/2026 — Merged Davina's and Vrishank's work into main and activated placeholders | Included in total | 0.75 |
-| 10/03/2026 — Added autosolve and supporting functions, comments, button adjustments, Easy AI updates, and testing | Included in total | 2.0 |
+| 09/21/2026 — Reviewed inherited project, tested Project 1 requirements, and summarized findings and possible additions | .5 | 0.75 |
+| 10/03/2026 — Merged Davina's and Vrishank's work into main and activated placeholders | .5 | 0.75 |
+| 10/03/2026 — Added autosolve and supporting functions, comments, button adjustments, Easy AI updates, and testing | 2 | 2.0 |
 | **Total** | **3** | **3.5** |
 
 #### Mo Osby
@@ -485,8 +485,8 @@ Code attribution must remain in the relevant source files. File prologues must i
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 09/26/2026 — Timer implementation, separation of loss handling into its own function, and comments | Included in total | 4 |
-| 10/06/2026 — Timer customization, game setup dialog class, and README updates for timer changes | Included in total | 2 |
+| 09/26/2026 — Timer implementation, separation of loss handling into its own function, and comments | 1 | 4 |
+| 10/06/2026 — Timer customization, game setup dialog class, and README updates for timer changes | 1 | 2 |
 | **Total** | **2** | **5** |
 
 #### Noah Mast
