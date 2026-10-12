@@ -448,59 +448,59 @@ Code attribution must remain in the relevant source files. File prologues must i
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 10/09/2026 — Claude-assisted Medium AI implementation and Hard AI solver on main | 3 | 3 |
-| **Total** | **3** | **3** |
+| 10/09/2026 — Claude-assisted Medium AI implementation and Hard AI solver on main | 4 | 4 |
+| **Total** | **4** | **4** |
 
 #### Vrishank Kulkarni
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 10/02/2026 — Easy AI mode | 1 | 1.25 |
-| **Total** | **1** | **1.25** |
+| 10/02/2026 — Easy AI mode | 2 | 2.25 |
+| **Total** | **2** | **2.25** |
 
 #### Alex Lanter
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 09/21/2026 — Reviewed inherited project, tested Project 1 requirements, and summarized findings and possible additions | Included in total | 0.5 |
-| 10/03/2026 — Merged Davina's and Vrishank's work into main and activated placeholders | Included in total | 0.5 |
-| 10/03/2026 — Added autosolve and supporting functions, comments, button adjustments, Easy AI updates, and testing | Included in total | 1.5 |
-| **Total** | **2** | **2.5** |
+| 09/21/2026 — Reviewed inherited project, tested Project 1 requirements, and summarized findings and possible additions | Included in total | 0.75 |
+| 10/03/2026 — Merged Davina's and Vrishank's work into main and activated placeholders | Included in total | 0.75 |
+| 10/03/2026 — Added autosolve and supporting functions, comments, button adjustments, Easy AI updates, and testing | Included in total | 2.0 |
+| **Total** | **3** | **3.5** |
 
 #### Mo Osby
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 10/06/2026 — Medium AI flag placement and connection of the Medium button to the solver | 1 | 1 |
-| **Total** | **1** | **1** |
+| 10/06/2026 — Medium AI flag placement and connection of the Medium button to the solver | 2 | 2 |
+| **Total** | **2** | **2** |
 
 #### Kayaan Patel
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 10/10/2026 — System architecture documentation and UML diagrams | 1 | 1.5 |
-| **Total** | **1** | **1.5** |
+| 10/10/2026 — System architecture documentation and UML diagrams | 2 | 2.5 |
+| **Total** | **2** | **2.5** |
 
 #### Davina Love
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 09/26/2026 — Timer implementation, separation of loss handling into its own function, and comments | Included in total | 3 |
-| 10/06/2026 — Timer customization, game setup dialog class, and README updates for timer changes | Included in total | 1 |
-| **Total** | **1** | **4** |
+| 09/26/2026 — Timer implementation, separation of loss handling into its own function, and comments | Included in total | 4 |
+| 10/06/2026 — Timer customization, game setup dialog class, and README updates for timer changes | Included in total | 2 |
+| **Total** | **2** | **5** |
 
 #### Noah Mast
 
 | Task | Estimated | Actual |
 | --- | --- | --- |
-| 10/06/2026 — Medium AI reveal rule when flagged neighbors equal the adjacent mine count | 1 | 1 |
-| **Total** | **1** | **1** |
+| 10/06/2026 — Medium AI reveal rule when flagged neighbors equal the adjacent mine count | 2 | 2 |
+| **Total** | **2** | **2** |
 
 #### How we got our estimates:
 
-We used planning poker to discuss and estimate the effort required for each task. Team members selected Fibonacci values to represent relative effort, considering complexity, uncertainty, and testing needs. We discussed differences between selections and agreed on an effort estimate, then translated that estimate into expected person-hours. Fibonacci values represented relative effort rather than hours directly.
+We made informal estimates based on how difficult we expected each member's assigned work to be and how long we thought implementation, documentation, and testing would take. These were rough guesses rather than estimates calculated using a formal model. Estimates were recorded as totals for each member's work; separate task estimates were not available for members with multiple entries.
 
-Actual hours were collected separately from team members' work reports in the Discord chat.Each report identified the work completed and the time spent. EECS 581 lecture time is excluded.
+Actual hours were collected from team members' work reports in the Discord chat. Each report identified the work completed and the time spent. EECS 581 lecture time is excluded.
 
 #### Group Meetings: Approximately 2–3 hours of meeting duration
 
@@ -510,7 +510,7 @@ The team reports approximately 2–3 hours of meetings. Exact dates, durations, 
 
 ## Grand Total Person Hours
 
-### Estimated Work Hours = 10
-### Actual Reported Work Hours = 14.25
+### Estimated Work Hours = 12
+### Actual Reported Work Hours = 16.25
 
 These totals exclude meeting person-hours, which must be added once individual attendance and durations are confirmed.
